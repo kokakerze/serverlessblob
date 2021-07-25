@@ -1,0 +1,140 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: blobserverless
+
+
+
+custom:
+  defaultRegion: eu-central-1
+  defaultEnvironmentGroup: dev
+  region: ${opt:region, self:custom.defaultRegion}
+  stage: ${opt:stage, env:USER}
+  objectPrefix: '${self:service}-${self:custom.stage}'
+
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+  region: ${self:custom.region}
+  stage: ${self:custom.stage}
+
+  environment:
+    BLOBS_TABLE: blobsTable
+    BLOBS_BUCKET: blobsbucket
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DescribeTable
+        - dynamodb:ListStreams
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.BLOBS_TABLE}"
+
+    - Effect: "Allow"
+      Action:
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:GetObject
+        - s3:DeleteObject
+        - s3:listBucketVersions
+        - s3:listBucket
+      Resource:
+        Fn::Join:
+          - ''
+          - - 'arn:aws:s3:::'
+            - 'Ref': 'BlobsBucket'
+            - '/*'
+
+    - Effect: "Allow"
+      Action:
+        - "rekognition:*"
+      Resource: "*"
+
+
+functions:
+  createBlobs:
+    handler: createBlobs.lambda_handler
+    events:
+      - httpApi:
+          path: /blobs
+          method: post
+
+  processBlobs:
+    handler: processBlobs.lambda_handler
+    events:
+      - s3:
+          bucket: ${self:provider.environment.BLOBS_BUCKET}
+          event: s3:ObjectCreated:*
+          existing: true
+
+
+  makeCallback:
+    handler: makeCallback.lambda_handler
+    events:
+      - httpApi:
+          path: /blobs/{id}
+          method: get
+
+resources:
+  Resources:
+    MyDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:provider.environment.BLOBS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: pid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+
+    BlobsBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: ${self:provider.environment.BLOBS_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: [ '*' ]
+              AllowedMethods: [ GET, POST, PUT ]
+              AllowedOrigins: [ '*' ]
+
+    S3BucketPolicy: # Allow uploaded files to be public and downloadable
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: { Ref: BlobsBucket }
+        PolicyDocument:
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: 'Allow'
+              Resource: { Fn::Join: [ '', [ { Fn::GetAtt: [ BlobsBucket, Arn ] }, '/*' ] ] } # arn:aws:s3:::bucketName/*
+              Principal: '*'
+
+
+
+
+
+plugins:
+  - serverless-python-requirements
