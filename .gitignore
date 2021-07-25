@@ -1,3 +1,4 @@
 .npmignore
 .serverless
 node_modules
+.idea
