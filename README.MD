@@ -46,7 +46,7 @@ $ sudo apt install curl
 
 <h3>Also you can test it by my own links:</h3>
 ```bash
-  POST - https://8as291eds6.execute-api.eu-central-1.amazonaws.com/blobs
+  POST - "https://8as291eds6.execute-api.eu-central-1.amazonaws.com/blobs"
 
-  GET - https://8as291eds6.execute-api.eu-central-1.amazonaws.com/blobs/{id}
+  GET - "https://8as291eds6.execute-api.eu-central-1.amazonaws.com/blobs/{id}"
 ```
