@@ -29,7 +29,7 @@ For working with project use <a href="https://www.postman.com">Postman</a> or CU
 
 Links for working with project you can find in terminal after deployment:
 
-<kbd><img src="https://github.com/kokakerze/1.png"/></kbd>
+<kbd><img src="https://github.com/kokakerze/serverlessblob/blob/c84686bcaae864a036047aa4110c971cfbb97c40/blobs/1.png"/></kbd>
 
 Mac:
 ```bash
