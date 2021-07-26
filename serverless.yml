@@ -84,12 +84,26 @@ functions:
           existing: true
 
 
-  makeCallback:
-    handler: makeCallback.lambda_handler
+  getBlobs:
+    handler: getBlobs.lambda_handler
     events:
       - httpApi:
           path: /blobs/{id}
           method: get
+
+  makeCallback:
+    handler: makeCallback.lambda_handler
+    events:
+      - stream:
+          type: dynamodb
+          batchSize: 1
+          startingPosition: LATEST
+          arn:
+            Fn::GetAtt:
+              - MyDynamoDbTable
+              - StreamArn
+
+
 
 resources:
   Resources:
@@ -108,7 +122,7 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         StreamSpecification:
-          StreamViewType: NEW_IMAGE
+          StreamViewType: NEW_AND_OLD_IMAGES
 
     BlobsBucket:
       Type: "AWS::S3::Bucket"
