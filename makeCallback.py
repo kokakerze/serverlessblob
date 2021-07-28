@@ -1,18 +1,13 @@
-import os
+import json
 
-import boto3
-from boto3.dynamodb.conditions import Key
+import requests
 
 
-def lambda_handler(event, context, dynamodb=None):
-    pid = event["Records"][0]['dynamodb']['NewImage']['pid']['S']
-
-    if not dynamodb:
-        dynamodb = boto3.resource('dynamodb')
-
-    table_name = os.environ.get('BLOBS_TABLE')
-    table = dynamodb.Table(table_name)
-    response = table.query(
-        KeyConditionExpression=Key('pid').eq(pid)
-    )
-    return response['Items']
+def lambda_handler(event, context,):
+    NewImage = event["Records"][0]['dynamodb']['NewImage']
+    if "labels" in NewImage:
+        callback = event["Records"][0]['dynamodb']['NewImage']['callback']['S']
+        labels = event["Records"][0]['dynamodb']['NewImage']['labels']['S']
+        data = json.dumps(labels)
+        requests.post(callback, json=data)
+    return NewImage

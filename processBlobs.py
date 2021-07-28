@@ -13,7 +13,6 @@ def lambda_handler(event, context):
     file_key = event['Records'][0]['s3']['object']['key']
     pid = file_key.replace(".jpeg", "")
     labels = detect_labels(file_key, bucket_name)
-    print("Labels detected: " + str(labels))
     table = boto3.resource('dynamodb').Table(table_name)
     response = table.update_item(Key={"pid": pid},
                                  UpdateExpression='SET labels = :val1 ',
