@@ -48,4 +48,4 @@ $ sudo apt install curl
 
   POST - "https://685qdq6ga9.execute-api.eu-central-1.amazonaws.com/blobs"
 
-  GET - "https://685qdq6ga9.execute-api.eu-central-1.amazonaws.com/blobs{id}"
+  GET - "https://685qdq6ga9.execute-api.eu-central-1.amazonaws.com/blobs/{id}"
