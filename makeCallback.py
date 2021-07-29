@@ -1,5 +1,5 @@
 import json
-
+import ast
 import requests
 
 
@@ -8,6 +8,8 @@ def lambda_handler(event, context,):
     if "labels" in NewImage:
         callback = event["Records"][0]['dynamodb']['NewImage']['callback']['S']
         labels = event["Records"][0]['dynamodb']['NewImage']['labels']['S']
-        data = json.dumps(labels)
-        requests.post(callback, json=data)
-    return NewImage
+        data = ast.literal_eval(labels)
+        data_json = json.dumps(data)
+        requests.post(callback, json=data_json)
+
+        return data_json
