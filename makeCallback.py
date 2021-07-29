@@ -10,12 +10,11 @@ def lambda_handler(event, context,):
         pid = event["Records"][0]['dynamodb']['NewImage']['pid']['S']
         labels = event["Records"][0]['dynamodb']['NewImage']['labels']['S']
         labels_list = ast.literal_eval(labels)
-        data = {
+        data_json = {
             "pid": pid,
             "labels": labels_list,
-
         }
-        data_json = json.dumps(data)
+        # data_json = json.dumps(data)
         print(data_json)
         headers = {"content-type": "application/json"}
         requests.post(callback, json=data_json, headers=headers)
