@@ -17,5 +17,8 @@ def lambda_handler(event, context,):
         }
         data_json = json.dumps(data)
         print(data_json)
-        requests.post(callback, json=data_json)
+        headers = {"content-type": "application/json"}
+        requests.post(callback, json=data_json, headers=headers)
         return data_json
+
+
