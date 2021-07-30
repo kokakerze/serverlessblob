@@ -24,7 +24,7 @@ def lambda_handler(event, context):
     response = table.put_item(TableName=table_name, Item=blob)
     return {
         "statusCode": 201,
-        "headers": {},
+        "headers": {"content-type": "application/json"},
         "body": json.dumps(
             {
                 "message": "Blob Created",
